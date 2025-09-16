@@ -2,11 +2,10 @@
 
 A beautiful, production-ready decentralized chat application built with React, TypeScript, Wagmi v2, and smart contracts. Experience the future of blockchain-powered communication with secure messaging, IPFS profile storage, and unique .lunar identities.
 
-![Lunar Chat](https://lovable.dev/opengraph-image-p98pqg.png)
 
 ## ✨ Features
 
-- **🔐 Wallet Integration** - Connect with MetaMask, WalletConnect, and other Web3 wallets
+- **🔐 Wallet Integration** - Connect with MetaMask, WalletConnect, and other Web3 wallets using rainbow kit
 - **🎭 Unique Identities** - Register personalized .lunar names with IPFS-hosted profile pictures
 - **💬 Real-time Messaging** - Private messages and group chat with blockchain event updates
 - **🌐 Decentralized Storage** - Profile images stored on IPFS via Pinata
@@ -65,27 +64,6 @@ A beautiful, production-ready decentralized chat application built with React, T
 - **Storage**: IPFS (Pinata)
 - **Blockchain**: Ethereum, Smart Contracts (Solidity)
 
-## 📖 Usage Guide
-
-### Getting Started
-
-1. **Landing Page**
-   - Beautiful hero section with app overview
-   - Click "Start Chatting" to begin
-
-2. **Wallet Connection**
-   - Connect your preferred Web3 wallet
-   - Supported: MetaMask, WalletConnect, and more
-
-3. **Profile Registration**
-   - Choose a unique display name (becomes `yourname.lunar`)
-   - Upload a profile picture (stored on IPFS)
-   - Submit transaction to register on blockchain
-
-4. **Chat Interface**
-   - **Left Sidebar**: List of all registered users
-   - **Main Area**: Private messages or group chat
-   - **Message Input**: Send messages to users or group
 
 ### Key Features
 
@@ -121,15 +99,6 @@ The app watches for these blockchain events:
 - `MessageSent` - Private message sent
 - `GroupMessageSent` - Group message sent
 
-## 🎨 Design System
-
-The app features a comprehensive design system with:
-
-- **Purple/Violet Theme** - Professional gradient color scheme
-- **Design Tokens** - Consistent colors, spacing, and typography
-- **Custom Components** - Enhanced Shadcn/ui components
-- **Responsive Design** - Mobile-first approach
-- **Dark Mode Ready** - Complete dark mode support
 
 ## 🔧 Configuration
 
