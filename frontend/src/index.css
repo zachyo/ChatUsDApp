@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Lunar Chat DApp Design System - Purple/Violet Theme */
+
+@layer base {
+  :root {
+    --background: 240 10% 98%;
+    --foreground: 240 10% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 9%;
+
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 263 30% 95%;
+    --secondary-foreground: 263 70% 30%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 263 50% 88%;
+    --accent-foreground: 263 70% 20%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 96%;
+    --ring: 263 70% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom Design Tokens */
+    --chat-primary: 263 70% 50%;
+    --chat-primary-light: 263 70% 60%;
+    --chat-primary-dark: 263 70% 40%;
+    --chat-accent: 280 65% 55%;
+    --chat-background: 240 10% 98%;
+    --chat-surface: 0 0% 100%;
+    --chat-surface-elevated: 240 5% 99%;
+    --chat-text: 240 10% 9%;
+    --chat-text-muted: 240 4% 46%;
+    --chat-border: 240 6% 90%;
+    --chat-success: 142 76% 36%;
+    --chat-warning: 38 92% 50%;
+    --chat-online: 142 76% 36%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--chat-primary)), hsl(var(--chat-accent)));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--chat-surface)), hsl(var(--chat-surface-elevated)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--chat-primary)) 0%, hsl(var(--chat-accent)) 100%);
+    
+    /* Shadows */
+    --shadow-elegant: 0 10px 25px -5px hsl(var(--chat-primary) / 0.1), 0 8px 10px -6px hsl(var(--chat-primary) / 0.1);
+    --shadow-card: 0 1px 3px 0 hsl(240 6% 0% / 0.1), 0 1px 2px -1px hsl(240 6% 0% / 0.1);
+    --shadow-message: 0 1px 2px 0 hsl(240 6% 0% / 0.05);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 240 5% 96%;
+
+    --card: 240 10% 6%;
+    --card-foreground: 240 5% 96%;
+
+    --popover: 240 10% 6%;
+    --popover-foreground: 240 5% 96%;
+
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 10% 12%;
+    --secondary-foreground: 240 5% 96%;
+
+    --muted: 240 10% 12%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 240 10% 12%;
+    --accent-foreground: 240 5% 96%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 240 5% 96%;
+
+    --border: 240 10% 15%;
+    --input: 240 10% 15%;
+    --ring: 263 70% 50%;
+
+    /* Custom Design Tokens - Dark Mode */
+    --chat-primary: 263 70% 50%;
+    --chat-primary-light: 263 70% 60%;
+    --chat-primary-dark: 263 70% 40%;
+    --chat-accent: 280 65% 55%;
+    --chat-background: 240 10% 4%;
+    --chat-surface: 240 10% 6%;
+    --chat-surface-elevated: 240 10% 8%;
+    --chat-text: 240 5% 96%;
+    --chat-text-muted: 240 5% 65%;
+    --chat-border: 240 10% 15%;
+    --chat-success: 142 76% 36%;
+    --chat-warning: 38 92% 50%;
+    --chat-online: 142 76% 36%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
