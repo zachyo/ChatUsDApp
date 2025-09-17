@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useAccount, useConnect, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useWatchContractEvent,
+  useWriteContract,
+} from "wagmi";
+import { watchContractEvent } from "wagmi/actions";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,15 +20,16 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useChatContext } from "@/context/ChatContext";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
+import { config } from "@/lib/wagmi";
 import { uploadToIPFS } from "@/lib/ipfs";
 import { Upload, Wallet, User, Loader2 } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Auth = () => {
-  const { address, isConnected } = useAccount();  
+  const { address, isConnected } = useAccount();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser, setLoading } = useChatContext();
+  const { currentUser, setLoading, setCurrentUser } = useChatContext();
 
   const [displayName, setDisplayName] = useState("");
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -31,7 +38,6 @@ const Auth = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   console.log(address);
   const { writeContract } = useWriteContract();
-  
 
   // Redirect if user is already registered
   useEffect(() => {
@@ -70,18 +76,62 @@ const Auth = () => {
       const imageHash = await uploadToIPFS(profileImage);
       setIsUploading(false);
 
-      // Register user on contract
-      writeContract({
+      const unwatch = watchContractEvent(config, {
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
-        functionName: "registerUser",
-        args: [displayName.trim(), imageHash],
-      } as any);
-
-      toast({
-        title: "Registration Submitted",
-        description: "Please confirm the transaction in your wallet.",
+        eventName: "UserRegistered",
+        onLogs: (logs) => {
+          const log = logs.find(
+            (l) => (l as any).args.userAddress === address
+          );
+          if (log) {
+            const { userAddress, displayName, ensName } = (log as any).args;
+            toast({
+              title: "Registration Confirmed",
+              description: "You have successfully registered on Lunar Chat.",
+            });
+            setCurrentUser({
+              userAddress,
+              displayName: displayName,
+              ensName,
+              isRegistered: true,
+              profileImageHash: imageHash,
+            });
+            navigate("/chat");
+            unwatch();
+          }
+        },
       });
+
+      // Register user on contract
+      writeContract(
+        {
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: "registerUser",
+          args: [displayName.trim(), imageHash],
+        } as any,
+        {
+          onSuccess: () => {
+            toast({
+              title: "Registration Submitted",
+              description: "Please confirm the transaction in your wallet.",
+            });
+          },
+          onError: (err) => {
+            console.error("Registration error:", err);
+            toast({
+              title: "Registration Failed",
+              description:
+                "Failed to submit transaction. Please try again.",
+              variant: "destructive",
+            });
+            setIsRegistering(false);
+            setLoading(false);
+            unwatch();
+          },
+        }
+      );
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -94,6 +144,29 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  useWatchContractEvent({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    eventName: "UserRegistered",
+    onLogs: (logs) => {
+      const { userAddress, displayName, ensName } = logs[0].args;
+      if (userAddress === address) {
+        toast({
+          title: "Registration Confirmed",
+          description: "You have successfully registered on Lunar Chat.",
+        });
+        setCurrentUser({
+          userAddress,
+          displayName: displayName,
+          ensName,
+          isRegistered: true,
+          profileImageHash: ""
+        });
+        navigate("/chat");
+      }
+    },
+  });
 
   if (!isConnected) {
     return (

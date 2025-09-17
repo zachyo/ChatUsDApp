@@ -110,7 +110,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { address } = useAccount();
 
   // Fetch all users
-  const { data: users } = useReadContract({
+  const { data: users, refetch: refetchAllUsers } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'getAllUsers',
@@ -165,7 +165,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     onLogs(logs) {
       // Refetch users when new user registers
       console.log('New user registered:', logs);
-      refetchUser()
+      refetchAllUsers?.();
+      const registeredUserAddress = logs[0]?.args?.userAddress;
+      if (registeredUserAddress === address) {
+        refetchUser();
+      }
     },
   });
 
@@ -212,7 +216,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (users && Array.isArray(users)) {
       dispatch({ type: 'SET_USERS', payload: users as User[] });
     }
-  }, [users]);
+  }, [users, refetchAllUsers]);
 
   // Update group messages when data changes
   useEffect(() => {
