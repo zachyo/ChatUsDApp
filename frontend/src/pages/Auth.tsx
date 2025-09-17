@@ -190,7 +190,8 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-chat-background via-chat-surface to-chat-surface-elevated flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-chat-background via-chat-surface to-chat-surface-elevated flex items-center justify-center p-4 relative">
+      <div className="absolute right-4 top-4"><ConnectButton /></div>
       <Card className="w-full max-w-md shadow-elegant border-chat-border">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mb-4">
