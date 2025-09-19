@@ -4,6 +4,7 @@ import { getIPFSUrl } from '@/lib/ipfs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
+import { formatPrices } from '@/hooks/utils';
 
 interface ChatMessagesProps {
   isGroupChat?: boolean;
@@ -84,7 +85,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ isGroupChat = false }) => {
                       alt={userInfo?.displayName}
                     />
                     <AvatarFallback className="bg-chat-primary text-white text-xs">
-                      {userInfo?.displayName.charAt(0).toUpperCase() || '?'}
+                      {userInfo?.displayName.charAt(0).toUpperCase() || 'O'}
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -100,13 +101,13 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ isGroupChat = false }) => {
                       : 'bg-chat-surface text-chat-text border border-chat-border rounded-bl-md'
                   }`}
                 >
-                  {!isCurrentUser && showAvatar && isGroupChat && (
+                  {!isCurrentUser && showAvatar && isGroupChat && !message.isPriceUpdate && (
                     <p className="text-xs font-medium mb-1 opacity-70">
                       {userInfo?.displayName || 'Unknown'}
                     </p>
                   )}
                   <p className="text-sm leading-relaxed break-words">
-                    {message.content}
+                    {message?.isPriceUpdate ? formatPrices(message.content) : message.content}
                   </p>
                   <p
                     className={`text-xs mt-1 ${

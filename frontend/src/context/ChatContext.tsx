@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect, useMemo } from 'react';
 import { useAccount, useReadContract, useReadContracts, useWatchContractEvent } from 'wagmi';
-import { CONTRACT_ABI, CONTRACT_ADDRESS } from '@/lib/contract';
+import { PRICE_CONTRACT_ABI as CONTRACT_ABI, CONTRACT_ADDRESS } from '@/lib/contract';
 
 export interface User {
   ensName: string;
@@ -16,6 +16,17 @@ export interface Message {
   content: string;
   timestamp: bigint;
   isGroupMessage: boolean;
+  isPriceUpdate?: boolean;
+}
+
+export interface PriceData {
+    btcUsd: bigint;
+    ethUsd: bigint;
+    btcEth: bigint;
+    btcUsdDecimals: number;
+    ethUsdDecimals: number;
+    btcEthDecimals: number;
+    lastUpdated: bigint;
 }
 
 interface ChatState {
@@ -25,6 +36,7 @@ interface ChatState {
   currentChat: string | null;
   currentUser: User | null;
   isLoading: boolean;
+  prices: PriceData | null;
 }
 
 interface ChatContextType extends ChatState {
@@ -34,6 +46,7 @@ interface ChatContextType extends ChatState {
   setUsers: (users: User[]) => void;
   setCurrentUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
+  setPrices: (prices: PriceData | null) => void;
 }
 
 type ChatAction =
@@ -44,7 +57,8 @@ type ChatAction =
   | { type: 'SET_CURRENT_USER'; payload: User | null }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_GROUP_MESSAGES'; payload: Message[] }
-  | { type: 'SET_PRIVATE_MESSAGES'; payload: Record<string, Message[]> };
+  | { type: 'SET_PRIVATE_MESSAGES'; payload: Record<string, Message[]> }
+  | { type: 'SET_PRICES'; payload: PriceData | null };
 
 const initialState: ChatState = {
   users: [],
@@ -53,6 +67,7 @@ const initialState: ChatState = {
   currentChat: null,
   currentUser: null,
   isLoading: false,
+  prices: null,
 };
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -90,6 +105,8 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
         return { ...state, groupMessages: action.payload };
     case 'SET_PRIVATE_MESSAGES':
         return { ...state, privateMessages: action.payload };
+    case 'SET_PRICES':
+        return { ...state, prices: action.payload };
     default:
       return state;
   }
@@ -126,11 +143,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   // Fetch group messages
-  const { data: groupMessagesData } = useReadContract({
+  const { data: groupMessagesData, refetch: refetchGroupMessages } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'getGroupMessages',
     query: { enabled: !!state.currentUser?.isRegistered }
+  });
+
+  // Fetch prices
+  const { data: pricesData, refetch: refetchPrices } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'getCurrentPrices',
   });
 
   // Fetch private messages for the current user with all other users
@@ -186,6 +210,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           content: log.args.content!,
           timestamp: log.args.timestamp!,
           isGroupMessage: true,
+          isPriceUpdate: false,
         };
         dispatch({ type: 'ADD_GROUP_MESSAGE', payload: message });
       });
@@ -205,9 +230,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           content: log.args.content!,
           timestamp: log.args.timestamp!,
           isGroupMessage: false,
+          isPriceUpdate: false,
         };
         dispatch({ type: 'ADD_PRIVATE_MESSAGE', payload: message });
       });
+    },
+  });
+
+  // Watch for price updates
+  useWatchContractEvent({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    eventName: 'PriceUpdateSent',
+    onLogs(logs) {
+      console.log('Price update sent:', logs);
+      refetchPrices?.();
+      refetchGroupMessages?.();
     },
   });
 
@@ -227,6 +265,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         content: m.content,
         timestamp: m.timestamp,
         isGroupMessage: m.isGroupMessage,
+        isPriceUpdate: m.isPriceUpdate,
       }));
       dispatch({ type: 'SET_GROUP_MESSAGES', payload: messages });
     }
@@ -243,6 +282,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           content: m.content,
           timestamp: m.timestamp,
           isGroupMessage: m.isGroupMessage,
+          isPriceUpdate: m.isPriceUpdate,
         })));
 
       const privateMessages: Record<string, Message[]> = {};
@@ -275,6 +315,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentUserData]);
 
+  // Update prices when data changes
+  useEffect(() => {
+    if (pricesData) {
+        const prices: PriceData = {
+            btcUsd: pricesData.btcUsd,
+            ethUsd: pricesData.ethUsd,
+            btcEth: pricesData.btcEth,
+            btcUsdDecimals: pricesData.btcUsdDecimals,
+            ethUsdDecimals: pricesData.ethUsdDecimals,
+            btcEthDecimals: pricesData.btcEthDecimals,
+            lastUpdated: pricesData.lastUpdated,
+        };
+        dispatch({ type: 'SET_PRICES', payload: prices });
+    }
+  }, [pricesData]);
+
   const setCurrentChat = useCallback((chatId: string | null) => {
     dispatch({ type: 'SET_CURRENT_CHAT', payload: chatId });
   }, []);
@@ -299,6 +355,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'SET_LOADING', payload: loading });
   }, []);
 
+  const setPrices = useCallback((prices: PriceData | null) => {
+    dispatch({ type: 'SET_PRICES', payload: prices });
+  }, []);
+
   const value: ChatContextType = {
     ...state,
     setCurrentChat,
@@ -307,6 +367,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsers,
     setCurrentUser,
     setLoading,
+    setPrices,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
